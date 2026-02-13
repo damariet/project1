@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>Play ME 💖</title>
+<title>Winning Autumn's Heart 💖</title>
 <style>
 :root { --vh: 1vh; }
 html, body {
@@ -55,14 +55,6 @@ button {
   font-size:5vw; z-index:20;
 }
 
-/* LEVEL UP */
-#levelUpBanner {
-  position:absolute; inset:0; display:none;
-  justify-content:center; align-items:center;
-  z-index:50; font-size:10vw; font-weight:bold;
-  color:hotpink; text-shadow:2px 2px 8px black;
-}
-
 /* NO COUNTDOWN */
 #noCountdown { color:white; font-size:5vw; text-align:center; margin-top:10px; text-shadow:1px 1px 4px black; }
 </style>
@@ -77,12 +69,9 @@ button {
   <source src="https://cdn.pixabay.com/download/audio/2022/03/10/audio_6e6f8e3d44.mp3">
 </audio>
 
-<!-- LEVEL UP -->
-<div id="levelUpBanner">LEVEL UP! 💥</div>
-
 <!-- SCREENS -->
 <div id="startScreen">
-  <h1>💘 Play Me 💘</h1>
+  <h1>💘 Winning Autumn's Heart 💘</h1>
   <button onclick="showTutorial()">PRESS START</button>
 </div>
 
@@ -113,26 +102,24 @@ button {
 <script>
 // dynamic viewport fix
 function setDvh(){ document.documentElement.style.setProperty('--vh', `${window.innerHeight*0.01}px`); }
-window.addEventListener('resize', setDvh);
-setDvh();
+window.addEventListener('resize', setDvh); setDvh();
 
-// GAME VARS
+// GAME STATE
 let score=0, level=1;
 const basket = document.getElementById("basket");
 const scoreDisplay = document.getElementById("score");
 const musicPlayer = document.getElementById("musicPlayer");
 const catchSound = document.getElementById("catchSound");
-const levelUpBanner = document.getElementById("levelUpBanner");
 
 let basketX = window.innerWidth/2, targetX=basketX;
 let moveStartX=null, touchActive=false, gameLoop, inactivityTimer, isPaused=false;
-let noReturn=null;
+let noTimer=null;
 
-// Hide until start
+// hide basket until play
 basket.style.left=basketX+"px";
 basket.style.display="none";
 
-// Smooth follow
+// smooth follow
 function smoothFollow(){
   basketX+=(targetX-basketX)*0.25;
   basket.style.left=basketX+"px";
@@ -140,7 +127,7 @@ function smoothFollow(){
 }
 smoothFollow();
 
-// Input
+// input
 function handleDrag(x){
   if(!touchActive) return;
   let delta=x-moveStartX;
@@ -155,12 +142,12 @@ document.addEventListener("mousedown", e=>{touchActive=true; moveStartX=e.client
 document.addEventListener("mousemove", e=>{handleDrag(e.clientX);});
 document.addEventListener("mouseup", ()=>touchActive=false);
 
-// Auto pause music
+// auto pause music
 document.addEventListener("visibilitychange", ()=>{
   if(document.hidden && !musicPlayer.paused) musicPlayer.pause();
 });
 
-// Pause/Resume
+// pause/resume
 const pauseBtn=document.getElementById("pauseBtn");
 const resumeBtn=document.getElementById("resumeBtn");
 pauseBtn.addEventListener("click", ()=>{
@@ -181,7 +168,7 @@ function togglePause(){
   else gameLoop=setInterval(createHeart,600-level*100);
 }
 
-// Tutorial/Demo
+// tutorial & demo
 function showTutorial(){
   document.getElementById("startScreen").style.display="none";
   document.getElementById("tutorialOverlay").style.display="flex";
@@ -208,7 +195,7 @@ function dropDemoHeart(){
   },30);
 }
 
-// START GAME
+// start game
 function startGame(){
   musicPlayer.volume=0;
   musicPlayer.play().catch(()=>{});
@@ -220,7 +207,7 @@ function startGame(){
   resetInactivity();
 }
 
-// Inactivity reset
+// inactivity
 function resetInactivity(){
   clearTimeout(inactivityTimer);
   inactivityTimer=setTimeout(()=>{
@@ -229,38 +216,19 @@ function resetInactivity(){
   },20000);
 }
 
-// HEART LOGIC
+// heart logic
 function updateScore(){
   const targets=[5,10,15];
   scoreDisplay.innerText=`LEVEL ${level} — LOVE: ${score} / ${targets[level-1]}`;
 }
 
-// level up banner
-function showLevelUp(){
-  levelUpBanner.style.display="flex"; levelUpBanner.style.opacity="1";
-  setTimeout(()=>{
-    levelUpBanner.style.transition="opacity 0.8s";
-    levelUpBanner.style.opacity="0";
-    setTimeout(()=>{
-      levelUpBanner.style.display="none"; levelUpBanner.style.transition="";
-    },800);
-  },100);
-}
-
 function nextLevel(){
+  // only proceed if actual play move to next level
+  level++; score=0;
   clearInterval(gameLoop);
-  if(level<3){
-    level++; score=0;
-    showLevelUp();
-    setTimeout(()=>{
-      updateScore();
-      gameLoop=setInterval(createHeart,600-level*100);
-      resetInactivity();
-    },1400);
-  } else {
-    // level 3 completed → to Valentine
-    showValentine();
-  }
+  if(level>3){ showValentine(); return; }
+  updateScore();
+  gameLoop=setInterval(createHeart,600-level*100);
 }
 
 function createHeart(){
@@ -268,7 +236,7 @@ function createHeart(){
   let heart=document.createElement("div");
   let isBroken=Math.random()<(0.2+level*0.15);
   heart.innerHTML = isBroken?"💔":"♥";
-  heart.className = isBroken?"broken":"heart";
+  heart.className=isBroken?"broken":"heart";
   heart.style.left=Math.random()*(window.innerWidth-40)+"px";
   heart.style.top="-30px";
   document.getElementById("gameArea").appendChild(heart);
@@ -287,10 +255,12 @@ function createHeart(){
        hr.left+hr.width > basketHitX &&
        hr.top < br.top+br.height &&
        hr.top+hr.height > br.top){
+      // deduct or add
       if(isBroken){
         score=Math.max(0,score-1);
       } else {
-        catchSound.currentTime=0; catchSound.play(); score++;
+        catchSound.currentTime=0; catchSound.play();
+        score++;
       }
       heart.remove(); clearInterval(fall);
       updateScore(); resetInactivity();
@@ -298,11 +268,11 @@ function createHeart(){
       const targets=[5,10,15];
       if(score>=targets[level-1]) nextLevel();
     }
-    if(heart.offsetTop>window.innerHeight){ heart.remove(); clearInterval(fall); }
+    if(heart.offsetTop>window.innerHeight){ heart.remove(); clearInterval(fall);} 
   },30);
 }
 
-// Valentine screens
+// valentine screens
 function showValentine(){document.getElementById("valentineScreen").style.display="flex";}
 
 document.getElementById("yesBtn").onclick=(()=>{
@@ -312,7 +282,7 @@ document.getElementById("yesBtn").onclick=(()=>{
     <button onclick="resetGame()">RESTART</button>`;
 });
 
-// NO behavior with countdown timer
+// NO with countdown and consistent Yes
 let noBtnMoves=0, noReturn=null;
 
 function attachNoEvents(){
@@ -374,7 +344,6 @@ function resetGame(){
 
 </body>
 </html>
-
 
 
 
