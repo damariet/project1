@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF‑8">
-<meta name="viewport" content="width=device-width, initial‑scale=1, maximum‑scale=1, user‑scalable=no, viewport‑fit=cover">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Winning Autumn's Heart 💖</title>
 <style>
 :root { --vh: 1vh; }
@@ -20,58 +20,34 @@ body { height:calc(var(--vh,1vh)*100); }
   display:flex; justify-content:center; align-items:center; flex-direction:column;
 }
 #startScreen {
-  background:linear-gradient(45deg,#ffccff,#ccffff,#ffffcc,#ffccff);
+  background: linear-gradient(45deg,#ffccff,#ccffff,#ffffcc,#ffccff);
   background-size:400% 400%; animation:rainbowShift 8s ease infinite;
   z-index:15;
 }
-@keyframes rainbowShift {
-  0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}
-}
-#startScreen h1 {
-  font-size:5.5vw;
-  text-align:center;
-  margin:0 10px;
-}
-#tutorialOverlay {
-  background:rgba(0,0,0,0.75);
-  color:cyan; font-size:4.5vw; text-align:center;
-  padding:15px; z-index:16; display:none;
-}
+@keyframes rainbowShift { 0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%} }
+#startScreen h1 { font-size:5.5vw; text-align:center; margin:0 10px; }
+#tutorialOverlay { background:rgba(0,0,0,0.75); color:cyan; font-size:4.5vw; text-align:center; padding:15px; z-index:16; display:none; }
 
 /* UI */
 button {
   padding:10px 22px; font-size:4.5vw;
   border:3px solid hotpink; background:black; color:hotpink;
-  cursor:pointer; margin-top:15px;
+  cursor:pointer; margin:15px;
 }
 #controls {
   position:fixed; top:8px; right:8px; z-index:20; display:none;
   font-size:4vw;
 }
-#gameArea {
-  width:100vw; height:calc(var(--vh,1vh)*100);
-  background:linear-gradient(to top,#120458,#000);
-  position:relative; overflow:hidden;
-}
-#score {
-  position:absolute; top:14px; width:100%;
-  color:cyan; font-size:4.5vw; z-index:5; display:none;
-}
 
-/* Hearts same size */
-.heart, .broken {
-  position:absolute;
-  font-size:7vw;
-}
+/* GAME AREA */
+#gameArea { width:100vw; height:calc(var(--vh,1vh)*100); background:linear-gradient(to top,#120458,#000); position:relative; overflow:hidden; }
+#score { position:absolute; top:14px; width:100%; color:cyan; font-size:4.5vw; z-index:5; display:none; }
+.heart, .broken { position:absolute; font-size:7vw; }
 .heart { color:#ff00ff; }
 .broken { color:cyan; }
+#basket { position:absolute; bottom:15px; font-size:7vw; color:cyan; display:none; }
 
-#basket {
-  position:absolute; bottom:15px; font-size:7vw;
-  color:cyan; display:none;
-}
-
-/* Valentine screen */
+/* VALENTINE SCREEN */
 #valentineScreen {
   position:absolute; inset:0;
   background:black; color:hotpink;
@@ -79,24 +55,16 @@ button {
   font-size:5vw; z-index:20;
 }
 
-/* LEVEL UP banner */
-#levelUpBanner {
-  position:absolute;
-  inset:0;
-  display:none;
-  justify-content:center;
-  align-items:center;
-  z-index:50;
-  font-size:10vw;
-  font-weight:bold;
-  color:hotpink;
-  text-shadow:2px 2px 8px black;
+/* NO COUNTDOWN */
+#noCountdown {
+  position:absolute; top:60%; color:white; font-size:5vw; text-align:center; margin-top:10px;
+  text-shadow:1px 1px 4px black;
 }
 </style>
 </head>
 <body>
 
-<!-- Audio -->
+<!-- AUDIO -->
 <audio id="musicPlayer" loop>
   <source src="https://raw.githubusercontent.com/damariet/valentine/main/Chris_Brown_-_New_Flame_Feat._Usher_And_Rick_Ross_(mp3.pm).mp3" type="audio/mpeg">
 </audio>
@@ -104,10 +72,7 @@ button {
   <source src="https://cdn.pixabay.com/download/audio/2022/03/10/audio_6e6f8e3d44.mp3">
 </audio>
 
-<!-- LEVEL UP BANNER -->
-<div id="levelUpBanner">LEVEL UP! 💥</div>
-
-<!-- Screens -->
+<!-- SCREENS -->
 <div id="startScreen">
   <h1>💘 Winning Autumn's Heart 💘</h1>
   <button onclick="showTutorial()">PRESS START</button>
@@ -134,34 +99,34 @@ button {
   <h2>Will you be my Valentine?</h2>
   <button id="yesBtn">YES</button>
   <button id="noBtn">NO</button>
+  <div id="noCountdown"></div>
 </div>
 
 <script>
-// dynamic viewport fix
-function setDvh() {
-  document.documentElement.style.setProperty('--vh', `${window.innerHeight*0.01}px`);
-}
+// dynamic viewport
+function setDvh(){ document.documentElement.style.setProperty('--vh', `${window.innerHeight*0.01}px`); }
 window.addEventListener('resize', setDvh);
 setDvh();
 
-// GAME VARS
+// game state vars
 let score=0, level=1;
-const basket = document.getElementById("basket");
-const scoreDisplay = document.getElementById("score");
-const musicPlayer = document.getElementById("musicPlayer");
-const catchSound = document.getElementById("catchSound");
-const levelUpBanner = document.getElementById("levelUpBanner");
+const basket=document.getElementById("basket");
+const scoreDisplay=document.getElementById("score");
+const musicPlayer=document.getElementById("musicPlayer");
+const catchSound=document.getElementById("catchSound");
+const noCountdown=document.getElementById("noCountdown");
 
-let basketX = window.innerWidth/2, targetX = basketX;
+let basketX=window.innerWidth/2, targetX=basketX;
 let moveStartX=null, touchActive=false, gameLoop, inactivityTimer, isPaused=false;
+let noTimer=null;
 
-// hide basket until start
+// hide basket until play
 basket.style.left=basketX+"px";
 basket.style.display="none";
 
 // smooth follow
 function smoothFollow(){
-  basketX += (targetX-basketX)*0.25;
+  basketX+=(targetX-basketX)*0.25;
   basket.style.left=basketX+"px";
   requestAnimationFrame(smoothFollow);
 }
@@ -170,9 +135,9 @@ smoothFollow();
 // input handling
 function handleDrag(x){
   if(!touchActive) return;
-  let delta = x - moveStartX;
-  targetX += delta*0.7;
-  moveStartX = x;
+  let delta=x-moveStartX;
+  targetX+=delta*0.7;
+  moveStartX=x;
   resetInactivity();
 }
 document.addEventListener("touchstart", e=>{touchActive=true; moveStartX=e.touches[0].clientX;});
@@ -182,12 +147,12 @@ document.addEventListener("mousedown", e=>{touchActive=true; moveStartX=e.client
 document.addEventListener("mousemove", e=>{handleDrag(e.clientX);});
 document.addEventListener("mouseup", ()=>touchActive=false);
 
-// auto pause music when hidden
+// auto pause music
 document.addEventListener("visibilitychange", ()=>{
   if(document.hidden && !musicPlayer.paused) musicPlayer.pause();
 });
 
-// Pause / Resume controls
+// pause/resume
 const pauseBtn=document.getElementById("pauseBtn");
 const resumeBtn=document.getElementById("resumeBtn");
 pauseBtn.addEventListener("click", ()=>{
@@ -207,32 +172,27 @@ resumeBtn.addEventListener("click", ()=>{
 function togglePause(){
   isPaused = !isPaused;
   if(isPaused) clearInterval(gameLoop);
-  else gameLoop = setInterval(createHeart, 600-level*100);
+  else gameLoop=setInterval(createHeart, 600-level*100);
 }
 
-// Show tutorial
+// TUTORIAL & DEMO
 function showTutorial(){
   document.getElementById("startScreen").style.display="none";
   document.getElementById("tutorialOverlay").style.display="flex";
 }
-
-// Demo then start
 function runDemo(){
   document.getElementById("tutorialOverlay").style.display="none";
   let count=0;
-  let demoInt = setInterval(()=>{
+  let id=setInterval(()=>{
     dropDemoHeart();
     count++;
-    if(count>=2){
-      clearInterval(demoInt);
-      setTimeout(startGame,500);
-    }
+    if(count>=2){ clearInterval(id); setTimeout(startGame,500); }
   },1000);
 }
 function dropDemoHeart(){
-  let heart = document.createElement("div");
+  let heart=document.createElement("div");
   heart.innerHTML="♥"; heart.className="heart";
-  heart.style.left = Math.random()*(window.innerWidth-40)+"px";
+  heart.style.left=Math.random()*(window.innerWidth-40)+"px";
   heart.style.top="-30px";
   document.getElementById("gameArea").appendChild(heart);
   let speed=4;
@@ -242,66 +202,39 @@ function dropDemoHeart(){
   },30);
 }
 
-// Start game
+// START GAME
 function startGame(){
   musicPlayer.volume=0;
   musicPlayer.play().catch(()=>{});
-  smoothFadeInMusic(8);
   scoreDisplay.style.display="block";
   document.getElementById("controls").style.display="block";
   basket.style.display="block";
   updateScore();
   gameLoop=setInterval(createHeart, 600-level*100);
-  resetInactivity(); // only during play
+  resetInactivity();
 }
 
-// Inactivity reset
+// inactivity (only during play)
 function resetInactivity(){
   clearTimeout(inactivityTimer);
-  inactivityTimer = setTimeout(()=>{
+  inactivityTimer=setTimeout(()=>{
     alert("No movement for 20s — restarting!");
     resetGame();
   },20000);
 }
 
-// Hearts & collision
+// HEART LOGIC
 function updateScore(){
   const targets=[5,10,15];
-  scoreDisplay.innerText = `LEVEL ${level} — LOVE: ${score} / ${targets[level-1]}`;
+  scoreDisplay.innerText=`LEVEL ${level} — LOVE: ${score} / ${targets[level-1]}`;
 }
-
-// Show level up banner
-function showLevelUp(){
-  levelUpBanner.style.display="flex";
-  levelUpBanner.style.opacity="1";
-  setTimeout(()=>{
-    levelUpBanner.style.transition="opacity 0.8s";
-    levelUpBanner.style.opacity="0";
-    setTimeout(()=>{
-      levelUpBanner.style.display="none";
-      levelUpBanner.style.transition="";
-    },800);
-  },1200);
-}
-
 function nextLevel(){
-  showLevelUp(); // show banner
-
-  level++;
-  score = 0;
-
-  if(level>3){
-    clearInterval(gameLoop);
-    showValentine();
-    return;
-  }
-
-  setTimeout(()=>{
-    updateScore();
-    resetInactivity();
-  },1500);
+  level++; score=0;
+  clearInterval(gameLoop);
+  if(level>3){ showValentine(); return; }
+  updateScore();
+  gameLoop=setInterval(createHeart, 600-level*100);
 }
-
 function createHeart(){
   if(isPaused) return;
   let heart=document.createElement("div");
@@ -326,33 +259,23 @@ function createHeart(){
        hr.left+hr.width > basketHitX &&
        hr.top < br.top+br.height &&
        hr.top+hr.height > br.top){
-      if(!isBroken){
+      if(isBroken){
+        score = Math.max(0, score-1);
+      } else {
         catchSound.currentTime=0; catchSound.play(); score++;
       }
       heart.remove(); clearInterval(fall);
       updateScore(); resetInactivity();
-      if((level===1&&score>=5)||(level===2&&score>=10)||(level===3&&score>=15)) nextLevel();
+      const targets=[5,10,15];
+      if(score>=targets[level-1]) nextLevel();
     }
-
-    if(heart.offsetTop>window.innerHeight){
-      heart.remove(); clearInterval(fall);
-    }
+    if(heart.offsetTop>window.innerHeight){ heart.remove(); clearInterval(fall); }
   },30);
 }
 
-// Music fade
-function smoothFadeInMusic(d){
-  let step=1/(d*20);
-  let fade=setInterval(()=>{
-    if(musicPlayer.volume<1) musicPlayer.volume=Math.min(musicPlayer.volume+step,1);
-    else clearInterval(fade);
-  },50);
-}
-
 // Valentine screens
-function showValentine(){
-  document.getElementById("valentineScreen").style.display="flex";
-}
+function showValentine(){document.getElementById("valentineScreen").style.display="flex";}
+
 document.getElementById("yesBtn").onclick=(()=>{
   document.getElementById("valentineScreen").innerHTML=`
     <h1>YOU WON MY HEART 💘</h1>
@@ -360,32 +283,46 @@ document.getElementById("yesBtn").onclick=(()=>{
     <button onclick="resetGame()">RESTART</button>`;
 });
 
-let noBtnMoves=0, noReturn=null;
-const noBtn=document.getElementById("noBtn");
-noBtn.onmouseover=(()=>{
-  if(noBtnMoves>=3) return;
-  noBtn.style.position="absolute";
-  const mx=valentineScreen.offsetWidth-noBtn.offsetWidth;
-  const my=valentineScreen.offsetHeight-noBtn.offsetHeight;
-  noBtn.style.left=Math.random()*mx+"px";
-  noBtn.style.top=Math.random()*my+"px";
-  noBtnMoves++;
-  if(noBtnMoves>=3) noBtn.onclick=showFinalNoMessage;
-});
+// NO behavior with countdown
+let noBtnMoves=0;
+let noReturnInterval=null;
+const valScreen=document.getElementById("valentineScreen");
 
-function showFinalNoMessage(){
+function attachNoListener(){
+  const btn=document.getElementById("noBtn");
+  btn.onmouseover=()=>{
+    if(noBtnMoves>=3) return;
+    btn.style.position="absolute";
+    const mx=valScreen.offsetWidth-btn.offsetWidth;
+    const my=valScreen.offsetHeight-btn.offsetHeight;
+    btn.style.left=Math.random()*mx+"px";
+    btn.style.top=Math.random()*my+"px";
+    noBtnMoves++;
+    if(noBtnMoves>=3) btn.onclick=triggerNoCountdown;
+  };
+}
+attachNoListener();
+
+function triggerNoCountdown(){
   document.getElementById("valentineScreen").innerHTML=`
     <h1>Oh you thought you could say NO? 😏</h1>
     <h2>Happy Valentine’s Day! 💘</h2>
-    <button onclick="resetGame()">RESTART</button>`;
-  if(noReturn) clearTimeout(noReturn);
-  noReturn=setTimeout(()=>{
-    document.getElementById("valentineScreen").innerHTML=`
-      <h1>Autumn… 💘</h1>
-      <h2>Will you be my Valentine?</h2>
-      <button id="yesBtn">YES</button>
-      <button id="noBtn">NO</button>`;
-  },5000);
+    <div id="noCountdown">Returning in 5</div>`;
+  let count=5;
+  noReturnInterval=setInterval(()=>{
+    count--;
+    document.getElementById("noCountdown").innerText = `Returning in ${count}`;
+    if(count<=0){
+      clearInterval(noReturnInterval);
+      document.getElementById("valentineScreen").innerHTML=`
+        <h1>Autumn… 💘</h1>
+        <h2>Will you be my Valentine?</h2>
+        <button id="yesBtn">YES</button>
+        <button id="noBtn">NO</button>`;
+      noBtnMoves=0;
+      attachNoListener();
+    }
+  },1000);
 }
 
 function resetGame(){
@@ -396,12 +333,13 @@ function resetGame(){
   basket.style.display="none";
   document.getElementById("startScreen").style.display="flex";
   clearInterval(gameLoop); clearTimeout(inactivityTimer);
-  if(noReturn) clearTimeout(noReturn);
+  if(noReturnInterval) clearInterval(noReturnInterval);
 }
 </script>
 
 </body>
 </html>
+
 
 
 
