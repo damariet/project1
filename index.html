@@ -81,6 +81,7 @@
         bottom:20px;
         font-size:50px;
         color:cyan;
+        display: none; /* hidden until game starts */
     }
     #valentineScreen {
         position:absolute;
@@ -128,7 +129,7 @@
     <button id="noBtn">NO</button>
 </div>
 
-<!-- Invisible split control zones -->
+<!-- Invisible touch zones -->
 <div id="leftZone" class="controlZone"></div>
 <div id="rightZone" class="controlZone"></div>
 
@@ -141,9 +142,8 @@ const catchSound = document.getElementById("catchSound");
 let basketX = window.innerWidth/2;
 let gameLoop, moveDirection = 0, isPaused = false;
 
+// Move the basket
 basket.style.left = basketX + "px";
-
-// Move basket each frame based on direction
 function moveBasket() {
     if (moveDirection !== 0) {
         basketX += moveDirection * 10;
@@ -152,24 +152,26 @@ function moveBasket() {
     }
     requestAnimationFrame(moveBasket);
 }
-moveBasket(); // start continuous movement loop
+moveBasket();
 
+// Start game
 function startGame() {
     document.getElementById("startScreen").style.display = "none";
     scoreDisplay.style.display = "block";
     document.getElementById("controls").style.display = "block";
+    basket.style.display = "block"; // show basket
     smoothFadeInMusic(10);
     updateScore();
     gameLoop = setInterval(createHeart, 600 - level*100);
 }
 
-// Split screen control behavior
+// Touch control zones
 document.getElementById("leftZone").addEventListener("touchstart", ()=> moveDirection = -1);
 document.getElementById("leftZone").addEventListener("touchend", ()=> moveDirection = 0);
 document.getElementById("rightZone").addEventListener("touchstart", ()=> moveDirection = 1);
 document.getElementById("rightZone").addEventListener("touchend", ()=> moveDirection = 0);
 
-// Pause/Resume
+// Pause & Resume
 const pauseBtn = document.getElementById("pauseBtn");
 const resumeBtn = document.getElementById("resumeBtn");
 
@@ -217,7 +219,7 @@ function createHeart() {
     let isBroken = Math.random() < (0.2 + level*0.15);
     heart.innerHTML = isBroken?"💔":"♥";
     heart.className = isBroken?"broken":"heart";
-    heart.style.left = Math.random()*(window.innerWidth-40) + "px";
+    heart.style.left = Math.random()*(window.innerWidth - 40) + "px";
     heart.style.top = "-30px";
     document.getElementById("gameArea").appendChild(heart);
 
@@ -225,10 +227,10 @@ function createHeart() {
     let fall = setInterval(() => {
         if (isPaused) return;
         heart.style.top = heart.offsetTop + speed + "px";
-        if (heart.offsetTop > window.innerHeight-100 &&
+        if (heart.offsetTop > window.innerHeight - 100 &&
             Math.abs(heart.offsetLeft - basketX) < 50) {
-            score += isBroken?-1:1;
-            score = Math.max(0,score);
+            score += isBroken ? -1 : 1;
+            score = Math.max(0, score);
             catchSound.currentTime = 0;
             catchSound.play();
             heart.remove();
@@ -242,7 +244,7 @@ function createHeart() {
             heart.remove();
             clearInterval(fall);
         }
-    }, 30);
+    },30);
 }
 
 function smoothFadeInMusic(duration) {
@@ -259,15 +261,15 @@ function showValentine() {
     document.getElementById("valentineScreen").style.display="flex";
 }
 
-document.getElementById("yesBtn").onclick = ()=>{
+document.getElementById("yesBtn").onclick = () => {
     document.getElementById("valentineScreen").innerHTML = `
       <h1>YOU WON MY HEART 💘</h1>
       <h2>Happy Valentine’s Day! 💘</h2>
       <button onclick="resetGame()">RESTART</button>`;
 };
 
-let noBtnMoves=0;
-const noBtn=document.getElementById("noBtn");
+let noBtnMoves = 0;
+const noBtn = document.getElementById("noBtn");
 noBtn.onmouseover = () => {
     if (noBtnMoves>=3) return;
     noBtn.style.position="absolute";
@@ -276,7 +278,7 @@ noBtn.onmouseover = () => {
     noBtn.style.left = Math.random()*maxX + "px";
     noBtn.style.top = Math.random()*maxY + "px";
     noBtnMoves++;
-    if(noBtnMoves>=3) noBtn.onclick=showFinalNoMessage;
+    if (noBtnMoves>=3) noBtn.onclick=showFinalNoMessage;
 };
 
 function showFinalNoMessage() {
@@ -292,6 +294,7 @@ function resetGame() {
     level=1; score=0; noBtnMoves=0;
     document.getElementById("controls").style.display="none";
     document.getElementById("valentineScreen").style.display="none";
+    basket.style.display="none"; // hide basket again
     document.getElementById("startScreen").style.display="flex";
 }
 </script>
