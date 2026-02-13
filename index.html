@@ -56,10 +56,7 @@ button {
 }
 
 /* NO COUNTDOWN */
-#noCountdown {
-  position:absolute; top:60%; color:white; font-size:5vw; text-align:center; margin-top:10px;
-  text-shadow:1px 1px 4px black;
-}
+#noCountdown { color:white; font-size:5vw; text-align:center; margin-top:10px; text-shadow:1px 1px 4px black; }
 </style>
 </head>
 <body>
@@ -103,20 +100,18 @@ button {
 </div>
 
 <script>
-// dynamic viewport
+// dynamic viewport fix
 function setDvh(){ document.documentElement.style.setProperty('--vh', `${window.innerHeight*0.01}px`); }
-window.addEventListener('resize', setDvh);
-setDvh();
+window.addEventListener('resize', setDvh); setDvh();
 
-// game state vars
+// GAME STATE
 let score=0, level=1;
-const basket=document.getElementById("basket");
-const scoreDisplay=document.getElementById("score");
-const musicPlayer=document.getElementById("musicPlayer");
-const catchSound=document.getElementById("catchSound");
-const noCountdown=document.getElementById("noCountdown");
+const basket = document.getElementById("basket");
+const scoreDisplay = document.getElementById("score");
+const musicPlayer = document.getElementById("musicPlayer");
+const catchSound = document.getElementById("catchSound");
 
-let basketX=window.innerWidth/2, targetX=basketX;
+let basketX = window.innerWidth/2, targetX=basketX;
 let moveStartX=null, touchActive=false, gameLoop, inactivityTimer, isPaused=false;
 let noTimer=null;
 
@@ -132,7 +127,7 @@ function smoothFollow(){
 }
 smoothFollow();
 
-// input handling
+// input
 function handleDrag(x){
   if(!touchActive) return;
   let delta=x-moveStartX;
@@ -157,25 +152,23 @@ const pauseBtn=document.getElementById("pauseBtn");
 const resumeBtn=document.getElementById("resumeBtn");
 pauseBtn.addEventListener("click", ()=>{
   if(!isPaused){
-    togglePause();
-    musicPlayer.pause();
+    togglePause(); musicPlayer.pause();
     pauseBtn.style.display="none"; resumeBtn.style.display="inline";
   }
 });
 resumeBtn.addEventListener("click", ()=>{
   if(isPaused){
-    togglePause();
-    musicPlayer.play();
+    togglePause(); musicPlayer.play();
     resumeBtn.style.display="none"; pauseBtn.style.display="inline";
   }
 });
 function togglePause(){
-  isPaused = !isPaused;
+  isPaused=!isPaused;
   if(isPaused) clearInterval(gameLoop);
-  else gameLoop=setInterval(createHeart, 600-level*100);
+  else gameLoop=setInterval(createHeart,600-level*100);
 }
 
-// TUTORIAL & DEMO
+// tutorial & demo
 function showTutorial(){
   document.getElementById("startScreen").style.display="none";
   document.getElementById("tutorialOverlay").style.display="flex";
@@ -202,7 +195,7 @@ function dropDemoHeart(){
   },30);
 }
 
-// START GAME
+// start game
 function startGame(){
   musicPlayer.volume=0;
   musicPlayer.play().catch(()=>{});
@@ -210,11 +203,11 @@ function startGame(){
   document.getElementById("controls").style.display="block";
   basket.style.display="block";
   updateScore();
-  gameLoop=setInterval(createHeart, 600-level*100);
+  gameLoop=setInterval(createHeart,600-level*100);
   resetInactivity();
 }
 
-// inactivity (only during play)
+// inactivity
 function resetInactivity(){
   clearTimeout(inactivityTimer);
   inactivityTimer=setTimeout(()=>{
@@ -223,29 +216,32 @@ function resetInactivity(){
   },20000);
 }
 
-// HEART LOGIC
+// heart logic
 function updateScore(){
   const targets=[5,10,15];
   scoreDisplay.innerText=`LEVEL ${level} — LOVE: ${score} / ${targets[level-1]}`;
 }
+
 function nextLevel(){
+  // only proceed if actual play move to next level
   level++; score=0;
   clearInterval(gameLoop);
   if(level>3){ showValentine(); return; }
   updateScore();
-  gameLoop=setInterval(createHeart, 600-level*100);
+  gameLoop=setInterval(createHeart,600-level*100);
 }
+
 function createHeart(){
   if(isPaused) return;
   let heart=document.createElement("div");
   let isBroken=Math.random()<(0.2+level*0.15);
   heart.innerHTML = isBroken?"💔":"♥";
-  heart.className = isBroken?"broken":"heart";
+  heart.className=isBroken?"broken":"heart";
   heart.style.left=Math.random()*(window.innerWidth-40)+"px";
   heart.style.top="-30px";
   document.getElementById("gameArea").appendChild(heart);
 
-  let speed = 2 + level*1.5;
+  let speed=2+level*1.5;
   let fall=setInterval(()=>{
     if(isPaused) return;
     heart.style.top=heart.offsetTop+speed+"px";
@@ -259,21 +255,24 @@ function createHeart(){
        hr.left+hr.width > basketHitX &&
        hr.top < br.top+br.height &&
        hr.top+hr.height > br.top){
+      // deduct or add
       if(isBroken){
-        score = Math.max(0, score-1);
+        score=Math.max(0,score-1);
       } else {
-        catchSound.currentTime=0; catchSound.play(); score++;
+        catchSound.currentTime=0; catchSound.play();
+        score++;
       }
       heart.remove(); clearInterval(fall);
       updateScore(); resetInactivity();
+
       const targets=[5,10,15];
       if(score>=targets[level-1]) nextLevel();
     }
-    if(heart.offsetTop>window.innerHeight){ heart.remove(); clearInterval(fall); }
+    if(heart.offsetTop>window.innerHeight){ heart.remove(); clearInterval(fall);} 
   },30);
 }
 
-// Valentine screens
+// valentine screens
 function showValentine(){document.getElementById("valentineScreen").style.display="flex";}
 
 document.getElementById("yesBtn").onclick=(()=>{
@@ -283,44 +282,50 @@ document.getElementById("yesBtn").onclick=(()=>{
     <button onclick="resetGame()">RESTART</button>`;
 });
 
-// NO behavior with countdown
-let noBtnMoves=0;
-let noReturnInterval=null;
-const valScreen=document.getElementById("valentineScreen");
+// NO with countdown and consistent Yes
+let noBtnMoves=0, noReturn=null;
 
-function attachNoListener(){
+function attachNoEvents(){
   const btn=document.getElementById("noBtn");
+  if(!btn) return;
   btn.onmouseover=()=>{
     if(noBtnMoves>=3) return;
     btn.style.position="absolute";
-    const mx=valScreen.offsetWidth-btn.offsetWidth;
-    const my=valScreen.offsetHeight-btn.offsetHeight;
+    const mx=valentineScreen.offsetWidth-btn.offsetWidth;
+    const my=valentineScreen.offsetHeight-btn.offsetHeight;
     btn.style.left=Math.random()*mx+"px";
     btn.style.top=Math.random()*my+"px";
     noBtnMoves++;
-    if(noBtnMoves>=3) btn.onclick=triggerNoCountdown;
+    if(noBtnMoves>=3) btn.onclick=startNoCountdown;
   };
 }
-attachNoListener();
+attachNoEvents();
 
-function triggerNoCountdown(){
+function startNoCountdown(){
   document.getElementById("valentineScreen").innerHTML=`
     <h1>Oh you thought you could say NO? 😏</h1>
     <h2>Happy Valentine’s Day! 💘</h2>
     <div id="noCountdown">Returning in 5</div>`;
+  noBtnMoves=0;
   let count=5;
-  noReturnInterval=setInterval(()=>{
+  noReturn=setInterval(()=>{
     count--;
     document.getElementById("noCountdown").innerText = `Returning in ${count}`;
     if(count<=0){
-      clearInterval(noReturnInterval);
+      clearInterval(noReturn);
       document.getElementById("valentineScreen").innerHTML=`
         <h1>Autumn… 💘</h1>
         <h2>Will you be my Valentine?</h2>
         <button id="yesBtn">YES</button>
-        <button id="noBtn">NO</button>`;
-      noBtnMoves=0;
-      attachNoListener();
+        <button id="noBtn">NO</button>
+        <div id="noCountdown"></div>`;
+      document.getElementById("yesBtn").onclick=(()=>{
+        document.getElementById("valentineScreen").innerHTML=`
+          <h1>YOU WON MY HEART 💘</h1>
+          <h2>Happy Valentine’s Day! 💘</h2>
+          <button onclick="resetGame()">RESTART</button>`;
+      });
+      attachNoEvents();
     }
   },1000);
 }
@@ -333,12 +338,13 @@ function resetGame(){
   basket.style.display="none";
   document.getElementById("startScreen").style.display="flex";
   clearInterval(gameLoop); clearTimeout(inactivityTimer);
-  if(noReturnInterval) clearInterval(noReturnInterval);
+  if(noReturn) clearInterval(noReturn);
 }
 </script>
 
 </body>
 </html>
+
 
 
 
